@@ -122,6 +122,23 @@
     .drum-window.h-cool    { border-color: #40aaee; box-shadow: 0 0 20px rgba(64,170,238,0.25); }
     .drum-window.h-cold    { border-color: #6060ee; box-shadow: 0 0 20px rgba(96,96,238,0.25); }
 
+    /* ── dial direction arrow ── */
+    .dial-arrow {
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      visibility: hidden;
+      transition: color 0.3s;
+    }
+    .dial-arrow.visible { visibility: visible; }
+    .drum-window.h-correct ~ .dial-arrow { color: rgba(61,220,61,0.75); }
+    .drum-window.h-hot     ~ .dial-arrow { color: rgba(255,80,32,0.85); }
+    .drum-window.h-warm    ~ .dial-arrow { color: rgba(255,160,32,0.8); }
+    .drum-window.h-cool    ~ .dial-arrow { color: rgba(64,170,238,0.75); }
+    .drum-window.h-cold    ~ .dial-arrow { color: rgba(96,96,238,0.75); }
+
     /* ── attempt dots ── */
     .attempt-dots { display: flex; gap: 7px; }
     .adot {
@@ -535,6 +552,29 @@ function updateDrumItems(i) {
   });
 }
 
+function getSpinDir(sel, correctIdx) {
+  const cw  = (correctIdx - sel + 8) % 8;
+  const ccw = (sel - correctIdx + 8) % 8;
+  if (cw  === 0) return null; // correct
+  if (cw  <  ccw) return +1;  // spin ▼
+  if (ccw <  cw)  return -1;  // spin ▲
+  return 0;                    // exactly opposite ↕
+}
+
+function updateDialArrow(i) {
+  const el = document.getElementById(`arrow${i}`);
+  if (!el || gs.attempts.length === 0) return;
+  const lastSels = gs.attempts[gs.attempts.length - 1].selections;
+  const dir = getSpinDir(lastSels[i], puzzle.dials[i].correctIdx);
+  if (dir === null) {
+    el.textContent = '';
+    el.classList.remove('visible');
+  } else {
+    el.textContent = dir === +1 ? '▼' : dir === -1 ? '▲' : '↕';
+    el.classList.add('visible');
+  }
+}
+
 function applyHeatToDrum(i) {
   const win = document.getElementById(`win${i}`);
   if (!win || gs.attempts.length === 0) return;
@@ -655,11 +695,17 @@ function buildDrums() {
     for (let a = 0; a < ATTEMPTS_TOTAL; a++) {
       const d = document.createElement('div'); d.className = 'adot'; dots.appendChild(d);
     }
+    const arrow = document.createElement('div');
+    arrow.className = 'dial-arrow';
+    arrow.id = `arrow${i}`;
+    col.appendChild(arrow);
+
     col.appendChild(dots);
 
     lb.appendChild(col);
     applyHeatToDrum(i);
     updateAttemptDots(i);
+    updateDialArrow(i);
   }
 
   if (kbdActive) setFocus(focusDial);
@@ -689,7 +735,7 @@ function pullHandle() {
   gs.attempts.push({ selections: [...gs.selections], distances });
   gs.attemptsLeft--;
 
-  for (let i = 0; i < 3; i++) { applyHeatToDrum(i); updateAttemptDots(i); }
+  for (let i = 0; i < 3; i++) { applyHeatToDrum(i); updateAttemptDots(i); updateDialArrow(i); }
 
   if (isWin) {
     gs.status = 'won';
