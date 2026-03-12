@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WordSafe</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1b2a1b;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Georgia', serif;
+      overflow: hidden;
+    }
+
+    /* ── SAFE BODY ── */
+    .safe-body {
+      position: relative;
+      width: min(96vw, 640px);
+      background: linear-gradient(160deg, #2d5c2d 0%, #1e3d1e 60%, #162c16 100%);
+      border: 6px solid #111;
+      border-radius: 18px;
+      padding: 32px 28px 28px;
+      box-shadow:
+        0 0 0 3px #4a7a4a,
+        0 30px 80px rgba(0,0,0,.85),
+        inset 0 1px 2px rgba(255,255,255,.08);
+    }
+
+    /* bolts */
+    .bolt {
+      position: absolute;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #c8b560, #7a6a30);
+      border: 2px solid #4a4020;
+      box-shadow: inset 0 1px 2px rgba(255,255,255,.3), 0 2px 4px rgba(0,0,0,.5);
+    }
+    .bolt-tl { top: 14px; left: 14px; }
+    .bolt-tr { top: 14px; right: 14px; }
+    .bolt-bl { bottom: 14px; left: 14px; }
+    .bolt-br { bottom: 14px; right: 14px; }
+
+    /* ── HEADER ── */
+    .safe-header {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+    .safe-title {
+      font-size: 1.6rem;
+      font-weight: bold;
+      letter-spacing: 6px;
+      color: #d4b84a;
+      text-shadow: 0 1px 4px rgba(0,0,0,.6);
+      text-transform: uppercase;
+    }
+    .safe-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+      font-size: .78rem;
+      color: #7a9a7a;
+      letter-spacing: 1px;
+    }
+    .prize-badge {
+      background: #1a3018;
+      border: 1px solid #3a6030;
+      border-radius: 6px;
+      padding: 3px 10px;
+      color: #c8e88a;
+      font-weight: bold;
+      font-size: .85rem;
+    }
+    .stash-badge {
+      background: #1a1a2e;
+      border: 1px solid #2a2a5e;
+      border-radius: 6px;
+      padding: 3px 10px;
+      color: #8888ff;
+      font-weight: bold;
+      font-size: .85rem;
+    }
+    .difficulty-badge {
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: .75rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .diff-easy   { background:#1a3018; color:#6de06d; border:1px solid #3a6030; }
+    .diff-medium { background:#3a2800; color:#ffa040; border:1px solid #6a4800; }
+    .diff-hard   { background:#2a0808; color:#ff5555; border:1px solid #5a1818; }
+
+    /* ── COMBO DISPLAY ── */
+    .combo-display {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 18px;
+      background: #0e1e0e;
+      border: 2px solid #2a4a2a;
+      border-radius: 10px;
+      padding: 8px 16px;
+    }
+    .combo-seg {
+      font-family: 'Courier New', monospace;
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: #d4ff80;
+      letter-spacing: 3px;
+      min-width: 48px;
+      text-align: center;
+      transition: color .2s;
+    }
+    .combo-dash { color: #3a5a3a; font-size: 1.2rem; }
+
+    /* ── DIALS ROW ── */
+    .dials-row {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .dial-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Dial circle */
+    .dial {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      position: relative;
+      cursor: pointer;
+      transition: box-shadow .2s;
+    }
+    .dial-ring {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 38% 35%, #d8d8d8, #888);
+      border: 5px solid #555;
+      box-shadow:
+        0 6px 18px rgba(0,0,0,.7),
+        inset 0 2px 6px rgba(255,255,255,.35),
+        inset 0 -2px 4px rgba(0,0,0,.4);
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow .3s, border-color .3s;
+    }
+
+    /* tick marks around dial */
+    .dial-ticks {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      transition: transform .25s cubic-bezier(.4,0,.2,1);
+    }
+    .tick {
+      position: absolute;
+      left: 50%;
+      top: 4px;
+      width: 3px;
+      height: 10px;
+      background: #444;
+      border-radius: 2px;
+      transform-origin: 1.5px 56px;
+    }
+    .tick.major { background: #222; height: 14px; width: 4px; }
+
+    /* center label */
+    .dial-label {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Courier New', monospace;
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: #1a1a1a;
+      letter-spacing: 3px;
+      text-shadow: 0 1px 2px rgba(255,255,255,.4);
+      user-select: none;
+      z-index: 2;
+    }
+
+    /* indicator notch at top */
+    .dial-notch {
+      position: absolute;
+      top: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0; height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 16px solid #d4b84a;
+      z-index: 10;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,.5));
+    }
+
+    /* heat ring overlay */
+    .heat-ring {
+      position: absolute;
+      inset: -5px;
+      border-radius: 50%;
+      border: 5px solid transparent;
+      transition: border-color .4s, box-shadow .4s;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* dial buttons */
+    .dial-btns {
+      display: flex;
+      gap: 10px;
+    }
+    .dial-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 3px solid #1a1a1a;
+      background: linear-gradient(145deg, #e8c840, #b89820);
+      color: #1a1a1a;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,.5), inset 0 1px 2px rgba(255,255,255,.3);
+      transition: transform .1s, box-shadow .1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .dial-btn:hover  { background: linear-gradient(145deg, #f0d050, #c0a030); }
+    .dial-btn:active { transform: scale(.92); box-shadow: 0 2px 4px rgba(0,0,0,.5); }
+    .dial-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* attempt dots below each dial */
+    .attempt-dots {
+      display: flex;
+      gap: 5px;
+    }
+    .adot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #1a3018;
+      border: 1px solid #2a5028;
+      transition: background .3s, border-color .3s, box-shadow .3s;
+    }
+    .adot.used-correct  { background: #3ddc3d; border-color: #2ab02a; box-shadow: 0 0 6px #3ddc3d; }
+    .adot.used-hot      { background: #ff4500; border-color: #cc3000; box-shadow: 0 0 6px #ff4500; }
+    .adot.used-warm     { background: #ffa500; border-color: #cc8000; box-shadow: 0 0 6px #ffa500; }
+    .adot.used-cool     { background: #40aadd; border-color: #3088aa; box-shadow: 0 0 6px #40aadd; }
+    .adot.used-cold     { background: #4040cc; border-color: #3030aa; box-shadow: 0 0 6px #4040cc; }
+
+    /* ── HANDLE AREA ── */
+    .handle-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    .handle-btn {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      cursor: pointer;
+      border: none;
+      background: none;
+      padding: 0;
+      transition: transform .15s;
+    }
+    .handle-btn:active { transform: translateX(8px); }
+    .handle-btn:disabled { cursor: not-allowed; opacity: .5; }
+
+    .handle-plate {
+      width: 22px;
+      height: 60px;
+      background: linear-gradient(90deg, #555, #888, #555);
+      border-radius: 4px 0 0 4px;
+      border: 2px solid #333;
+      box-shadow: inset 0 1px 3px rgba(255,255,255,.2);
+    }
+    .handle-bar {
+      width: 64px;
+      height: 26px;
+      background: linear-gradient(180deg, #c8b030, #8a7020);
+      border: 3px solid #5a4a10;
+      border-radius: 0 13px 13px 0;
+      box-shadow: 0 4px 10px rgba(0,0,0,.5), inset 0 1px 3px rgba(255,255,255,.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .65rem;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      color: #2a1a00;
+      text-transform: uppercase;
+    }
+
+    .handle-label {
+      margin-top: 6px;
+      font-size: .7rem;
+      color: #5a7a5a;
+      letter-spacing: 2px;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    /* ── ATTEMPTS LEFT ── */
+    .attempts-row {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .attempt-pip {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #d4b84a, #8a7020);
+      border: 2px solid #5a4a10;
+      box-shadow: 0 2px 4px rgba(0,0,0,.4);
+      transition: opacity .3s;
+    }
+    .attempt-pip.spent {
+      background: #1a1a1a;
+      border-color: #2a2a2a;
+      box-shadow: none;
+      opacity: .4;
+    }
+
+    /* ── MESSAGE ── */
+    .message-area {
+      text-align: center;
+      min-height: 28px;
+      font-size: .85rem;
+      letter-spacing: 1px;
+      color: #8aaa8a;
+      margin-top: 4px;
+    }
+
+    /* ── OVERLAY (win / lose / share) ── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.82);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .4s;
+    }
+    .overlay.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .overlay-card {
+      background: linear-gradient(160deg, #1e3d1e, #162c16);
+      border: 4px solid #3a6030;
+      border-radius: 18px;
+      padding: 36px 40px;
+      max-width: 440px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 30px 80px rgba(0,0,0,.9);
+    }
+    .overlay-card.busted {
+      border-color: #6a1818;
+      background: linear-gradient(160deg, #2a1010, #1a0808);
+    }
+    .overlay-emoji { font-size: 3.5rem; margin-bottom: 12px; }
+    .overlay-title {
+      font-size: 1.8rem;
+      font-weight: bold;
+      letter-spacing: 4px;
+      color: #d4b84a;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .overlay-card.busted .overlay-title { color: #ff5555; }
+    .overlay-subtitle {
+      color: #7aaa7a;
+      font-size: .9rem;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+    .overlay-card.busted .overlay-subtitle { color: #aa5555; }
+    .share-box {
+      background: #0e180e;
+      border: 1px solid #2a4020;
+      border-radius: 10px;
+      padding: 14px;
+      font-family: monospace;
+      font-size: .9rem;
+      color: #c8e8a0;
+      line-height: 1.7;
+      margin-bottom: 16px;
+      white-space: pre-wrap;
+      text-align: left;
+      min-height: 80px;
+    }
+    .overlay-card.busted .share-box {
+      background: #180e0e;
+      border-color: #401a1a;
+      color: #e8a0a0;
+    }
+    .btn-share {
+      background: linear-gradient(145deg, #e8c840, #b89820);
+      border: 3px solid #5a4a10;
+      border-radius: 10px;
+      padding: 10px 28px;
+      font-family: Georgia, serif;
+      font-size: .9rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      color: #1a1a00;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,.5);
+      transition: transform .1s;
+      text-transform: uppercase;
+    }
+    .btn-share:hover  { background: linear-gradient(145deg, #f0d050, #c0a030); }
+    .btn-share:active { transform: scale(.95); }
+    .copied-hint { color: #6ddc6d; font-size: .75rem; margin-top: 8px; min-height: 16px; }
+
+    /* ── SAFE SHAKE ── */
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%      { transform: translateX(-8px); }
+      40%      { transform: translateX(8px); }
+      60%      { transform: translateX(-5px); }
+      80%      { transform: translateX(5px); }
+    }
+    .shaking { animation: shake .4s ease; }
+
+    /* ── SAFE OPEN ── */
+    @keyframes safeOpen {
+      0%   { transform: scale(1) rotate(0deg); }
+      30%  { transform: scale(1.04) rotate(-1deg); }
+      60%  { transform: scale(1.02) rotate(1deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+    .safe-open { animation: safeOpen .6s ease; }
+
+    /* ── DIAL SPIN ── */
+    @keyframes dialSpin {
+      0%   { opacity: 1; }
+      40%  { opacity: 0; }
+      60%  { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    .dial-spinning .dial-label { animation: dialSpin .25s ease; }
+
+    /* heat colors for dial-ring */
+    .heat-correct { border-color: #3ddc3d !important; box-shadow: 0 6px 18px rgba(0,0,0,.7), inset 0 2px 6px rgba(255,255,255,.35), 0 0 14px #3ddc3d !important; }
+    .heat-hot     { border-color: #ff4500 !important; box-shadow: 0 6px 18px rgba(0,0,0,.7), inset 0 2px 6px rgba(255,255,255,.35), 0 0 14px #ff4500 !important; }
+    .heat-warm    { border-color: #ffa500 !important; box-shadow: 0 6px 18px rgba(0,0,0,.7), inset 0 2px 6px rgba(255,255,255,.35), 0 0 14px #ffa500 !important; }
+    .heat-cool    { border-color: #40aadd !important; box-shadow: 0 6px 18px rgba(0,0,0,.7), inset 0 2px 6px rgba(255,255,255,.35), 0 0 14px #40aadd !important; }
+    .heat-cold    { border-color: #5050ee !important; box-shadow: 0 6px 18px rgba(0,0,0,.7), inset 0 2px 6px rgba(255,255,255,.35), 0 0 14px #5050ee !important; }
+
+    .safe-label-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .heat-legend {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: .65rem;
+      color: #5a7a5a;
+      letter-spacing: .5px;
+    }
+    .legend-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+
+<!-- SAFE -->
+<div class="safe-body" id="safeBody">
+  <div class="bolt bolt-tl"></div>
+  <div class="bolt bolt-tr"></div>
+  <div class="bolt bolt-bl"></div>
+  <div class="bolt bolt-br"></div>
+
+  <!-- Header -->
+  <div class="safe-header">
+    <div class="safe-title">WordSafe</div>
+    <div class="safe-meta">
+      <span class="stash-badge" id="stashBadge">💰 $0</span>
+      <span class="difficulty-badge" id="diffBadge">—</span>
+      <span class="prize-badge" id="prizeBadge">🏆 $0</span>
+    </div>
+  </div>
+
+  <!-- Current combo display -->
+  <div class="combo-display">
+    <span class="combo-seg" id="seg0">??</span>
+    <span class="combo-dash">—</span>
+    <span class="combo-seg" id="seg1">??</span>
+    <span class="combo-dash">—</span>
+    <span class="combo-seg" id="seg2">??</span>
+  </div>
+
+  <!-- Dials -->
+  <div class="dials-row" id="dialsRow">
+    <!-- generated by JS -->
+  </div>
+
+  <!-- Attempts remaining -->
+  <div class="attempts-row" id="attemptsRow"></div>
+
+  <!-- Handle -->
+  <div class="handle-area">
+    <div style="display:flex;flex-direction:column;align-items:center;">
+      <button class="handle-btn" id="handleBtn" onclick="pullHandle()">
+        <div class="handle-plate"></div>
+        <div class="handle-bar">PULL</div>
+      </button>
+      <div class="handle-label" id="handleLabel">Pull to open</div>
+    </div>
+  </div>
+
+  <!-- Message -->
+  <div class="message-area" id="messageArea"></div>
+
+  <!-- Legend -->
+  <div class="heat-legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#3ddc3d"></div>Correct</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ff4500"></div>Hot</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ffa500"></div>Warm</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#40aadd"></div>Cool</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#5050ee"></div>Cold</div>
+  </div>
+</div>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay">
+  <div class="overlay-card" id="overlayCard">
+    <div class="overlay-emoji" id="overlayEmoji"></div>
+    <div class="overlay-title" id="overlayTitle"></div>
+    <div class="overlay-subtitle" id="overlaySubtitle"></div>
+    <div class="share-box" id="shareBox"></div>
+    <button class="btn-share" onclick="copyShare()">📋 Copy Result</button>
+    <div class="copied-hint" id="copiedHint"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// WORD LIST
+// ═══════════════════════════════════════════════════════════════
+const WORDS = [
+  // Easy $500
+  { word:'BASKET', difficulty:'easy',   value:500  },
+  { word:'WINTER', difficulty:'easy',   value:500  },
+  { word:'FLOWER', difficulty:'easy',   value:500  },
+  { word:'GARDEN', difficulty:'easy',   value:500  },
+  { word:'BUTTER', difficulty:'easy',   value:500  },
+  { word:'SILVER', difficulty:'easy',   value:500  },
+  { word:'MARKET', difficulty:'easy',   value:500  },
+  { word:'WINDOW', difficulty:'easy',   value:500  },
+  { word:'CASTLE', difficulty:'easy',   value:500  },
+  { word:'FINGER', difficulty:'easy',   value:500  },
+  { word:'BRIDGE', difficulty:'easy',   value:500  },
+  { word:'PLANET', difficulty:'easy',   value:500  },
+  { word:'ROCKET', difficulty:'easy',   value:500  },
+  { word:'FROZEN', difficulty:'easy',   value:500  },
+  { word:'HUNTER', difficulty:'easy',   value:500  },
+  { word:'DINNER', difficulty:'easy',   value:500  },
+  { word:'BOTTLE', difficulty:'easy',   value:500  },
+  { word:'PUZZLE', difficulty:'easy',   value:500  },
+  { word:'KITTEN', difficulty:'easy',   value:500  },
+  { word:'COFFEE', difficulty:'easy',   value:500  },
+  { word:'CANNON', difficulty:'easy',   value:500  },
+  { word:'DONKEY', difficulty:'easy',   value:500  },
+  { word:'GOBLET', difficulty:'easy',   value:500  },
+  { word:'INSECT', difficulty:'easy',   value:500  },
+  { word:'JUNGLE', difficulty:'easy',   value:500  },
+  { word:'LOCKET', difficulty:'easy',   value:500  },
+  { word:'MAGNET', difficulty:'easy',   value:500  },
+  { word:'NAPKIN', difficulty:'easy',   value:500  },
+  { word:'PARROT', difficulty:'easy',   value:500  },
+  { word:'RABBIT', difficulty:'easy',   value:500  },
+  // Medium $1000
+  { word:'BOUNCE', difficulty:'medium', value:1000 },
+  { word:'SHRINK', difficulty:'medium', value:1000 },
+  { word:'TURNIP', difficulty:'medium', value:1000 },
+  { word:'OYSTER', difficulty:'medium', value:1000 },
+  { word:'ZIPPER', difficulty:'medium', value:1000 },
+  { word:'CACTUS', difficulty:'medium', value:1000 },
+  { word:'FRIGHT', difficulty:'medium', value:1000 },
+  { word:'PLUNGE', difficulty:'medium', value:1000 },
+  { word:'TROPHY', difficulty:'medium', value:1000 },
+  { word:'MONKEY', difficulty:'medium', value:1000 },
+  { word:'JOCKEY', difficulty:'medium', value:1000 },
+  { word:'WALNUT', difficulty:'medium', value:1000 },
+  { word:'CELLAR', difficulty:'medium', value:1000 },
+  { word:'GOBLIN', difficulty:'medium', value:1000 },
+  { word:'LIZARD', difficulty:'medium', value:1000 },
+  { word:'MUFFIN', difficulty:'medium', value:1000 },
+  { word:'NUZZLE', difficulty:'medium', value:1000 },
+  { word:'ORCHID', difficulty:'medium', value:1000 },
+  { word:'PENCIL', difficulty:'medium', value:1000 },
+  { word:'QUIVER', difficulty:'medium', value:1000 },
+  { word:'RITUAL', difficulty:'medium', value:1000 },
+  { word:'SWIVEL', difficulty:'medium', value:1000 },
+  { word:'TANGLE', difficulty:'medium', value:1000 },
+  { word:'UNWIND', difficulty:'medium', value:1000 },
+  { word:'VERTEX', difficulty:'medium', value:1000 },
+  { word:'WIGGLE', difficulty:'medium', value:1000 },
+  { word:'YOGURT', difficulty:'medium', value:1000 },
+  { word:'ZEALOT', difficulty:'medium', value:1000 },
+  { word:'BLOTCH', difficulty:'medium', value:1000 },
+  { word:'CLUTCH', difficulty:'medium', value:1000 },
+  // Hard $2000
+  { word:'SCULPT', difficulty:'hard',   value:2000 },
+  { word:'EXEMPT', difficulty:'hard',   value:2000 },
+  { word:'ABRUPT', difficulty:'hard',   value:2000 },
+  { word:'SCRIPT', difficulty:'hard',   value:2000 },
+  { word:'SHRIMP', difficulty:'hard',   value:2000 },
+  { word:'SQUIRT', difficulty:'hard',   value:2000 },
+  { word:'THWART', difficulty:'hard',   value:2000 },
+  { word:'SMUDGE', difficulty:'hard',   value:2000 },
+  { word:'CYGNET', difficulty:'hard',   value:2000 },
+  { word:'NYMPH',  difficulty:'hard',   value:2000 }, // 5 letters – skip via filter
+  { word:'DWEEB',  difficulty:'hard',   value:2000 }, // 5 letters – skip
+  { word:'KVETCH', difficulty:'hard',   value:2000 },
+  { word:'PHLEGM', difficulty:'hard',   value:2000 },
+  { word:'WHELP',  difficulty:'hard',   value:2000 }, // 5 – skip
+  { word:'FLYSCH', difficulty:'hard',   value:2000 },
+  { word:'THATCH', difficulty:'hard',   value:2000 },
+  { word:'SPRITZ', difficulty:'hard',   value:2000 },
+  { word:'STYMIE', difficulty:'hard',   value:2000 },
+  { word:'FLUXED', difficulty:'hard',   value:2000 },
+  { word:'BLURBS', difficulty:'hard',   value:2000 },
+].filter(w => w.word.length === 6);
+
+// ═══════════════════════════════════════════════════════════════
+// DIGRAM POOLS (by position)
+// ═══════════════════════════════════════════════════════════════
+const POOL = [
+  // Pool 0: word-starting digrams (letters 1–2)
+  ['BA','BE','BI','BL','BO','BR','BU','CA','CH','CL','CO','CR','DE','DI','DO',
+   'DR','EX','FL','FO','FR','GA','GL','GO','GR','HA','HE','HI','HO','HU','IN',
+   'JO','KI','LA','LE','LI','LO','MA','ME','MI','MO','MU','NO','PA','PL','PO',
+   'PR','PU','QU','RA','RE','RO','SA','SC','SE','SH','SI','SK','SL','SM','SN',
+   'SO','SP','SQ','ST','SU','SW','TA','TE','TH','TI','TO','TR','TU','TW','UN',
+   'VA','WA','WH','WI','WO','ZE','ZI'],
+  // Pool 1: word-middle digrams (letters 3–4)
+  ['ND','NG','NK','NT','LL','PP','TT','RR','SS','FF','CK','CT','LT','MP','RT',
+   'ST','NN','TH','SH','CH','RI','LE','IN','AN','AR','ER','OR','ON','UN','AL',
+   'EN','AT','OT','OW','OL','OU','IR','UR','IS','IT','IG','LU','LO','LA','LI',
+   'RU','RA','ET','EL','EM','IM','IP','AM','AP','AY','EY','EW','EE','OO','AU',
+   'GG','BB','DD','MM','EI','IE','UI','OI','ZZ','WL','WN','WI','GL','PL','BL'],
+  // Pool 2: word-ending digrams (letters 5–6)
+  ['ER','ED','EN','ES','LY','AL','EL','ON','OR','OT','IN','AN','AT','LE','ND',
+   'NG','NT','NK','MP','RD','RT','LT','GE','CE','SE','TE','DE','VE','KE','RE',
+   'HT','CH','SH','TH','FT','ST','SK','SS','LL','OW','OY','AY','EY','EW','EE',
+   'OO','IP','IT','IS','UM','US','UT','ID','UP','AM','AS','OX','PH','ET','EK',
+   'GY','RY','LY','NY','TY','BY','DY','FY','PY','SY','XY','ZE','XE','PE','ME'],
+];
+
+// ═══════════════════════════════════════════════════════════════
+// SEEDED RNG (LCG)
+// ═══════════════════════════════════════════════════════════════
+function makeRng(seed) {
+  let s = seed >>> 0;
+  return () => {
+    s = Math.imul(1664525, s) + 1013904223 >>> 0;
+    return s / 0x100000000;
+  };
+}
+function shuffleArr(arr, rng) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DATE UTILITIES
+// ═══════════════════════════════════════════════════════════════
+function todayUTC() {
+  const d = new Date();
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+}
+function dateSeed(dateStr) {
+  return dateStr.split('-').reduce((acc, n, i) => acc + parseInt(n) * [10000, 100, 1][i], 0);
+}
+function dayNumber(dateStr) {
+  const epoch = new Date('2025-01-01').getTime();
+  const d = new Date(dateStr + 'T00:00:00Z').getTime();
+  return Math.floor((d - epoch) / 86400000) + 1;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BUILD DAILY PUZZLE
+// ═══════════════════════════════════════════════════════════════
+function buildPuzzle(dateStr) {
+  const seed = dateSeed(dateStr);
+  const rng  = makeRng(seed);
+
+  const shuffledWords = shuffleArr(WORDS, makeRng(seed ^ 0xDEADBEEF));
+  const wordObj = shuffledWords[0];
+  const word = wordObj.word;
+
+  // Split word into 3 digrams
+  const digrams = [word.slice(0,2), word.slice(2,4), word.slice(4,6)];
+
+  // Build each dial: correct + 7 red herrings from pool
+  const dials = digrams.map((correct, pos) => {
+    const rng2 = makeRng(seed ^ (pos * 0x1337 + 0xCAFE));
+    const pool = POOL[pos].filter(d => d !== correct);
+    const herrings = shuffleArr(pool, rng2).slice(0, 7);
+    const options = shuffleArr([correct, ...herrings], makeRng(seed ^ (pos * 0xABCD)));
+    const correctIdx = options.indexOf(correct);
+    return { options, correctIdx };
+  });
+
+  return { ...wordObj, digrams, dials, dateStr };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════════════════════════
+const TOTAL_ATTEMPTS = 4;
+const STASH_KEY  = 'wordsafe_stash';
+const STATE_KEY  = 'wordsafe_state';
+const START_STASH = 1000;
+
+let puzzle, gameState;
+
+function loadState() {
+  const today = todayUTC();
+  puzzle = buildPuzzle(today);
+
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(STATE_KEY)); } catch(e) {}
+
+  const stash = (() => {
+    const v = parseInt(localStorage.getItem(STASH_KEY));
+    return isNaN(v) ? START_STASH : v;
+  })();
+
+  if (saved && saved.dateStr === today) {
+    gameState = { ...saved, stash };
+  } else {
+    gameState = {
+      dateStr: today,
+      stash,
+      selections: [0, 0, 0],        // current dial positions
+      attempts: [],                  // [{sels, distances}]
+      attemptsLeft: TOTAL_ATTEMPTS,
+      status: 'playing',             // 'playing' | 'won' | 'lost'
+    };
+    saveState();
+  }
+}
+
+function saveState() {
+  const { stash, ...rest } = gameState;
+  try {
+    localStorage.setItem(STATE_KEY, JSON.stringify(rest));
+    localStorage.setItem(STASH_KEY, String(gameState.stash));
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DIAL DISTANCE (circular, 8 stops)
+// ═══════════════════════════════════════════════════════════════
+function dialDist(a, b) {
+  const diff = Math.abs(a - b);
+  return Math.min(diff, 8 - diff);
+}
+function heatClass(dist) {
+  if (dist === 0) return 'heat-correct';
+  if (dist === 1) return 'heat-hot';
+  if (dist === 2) return 'heat-warm';
+  if (dist === 3) return 'heat-cool';
+  return 'heat-cold';
+}
+function dotClass(dist) {
+  if (dist === 0) return 'used-correct';
+  if (dist === 1) return 'used-hot';
+  if (dist === 2) return 'used-warm';
+  if (dist === 3) return 'used-cool';
+  return 'used-cold';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+let dialRotations = [0, 0, 0]; // visual rotation angles
+
+function render() {
+  const { stash, selections, attempts, attemptsLeft, status } = gameState;
+
+  // badges
+  document.getElementById('stashBadge').textContent = `💰 $${stash.toLocaleString()}`;
+  document.getElementById('prizeBadge').textContent  = `🏆 $${puzzle.value.toLocaleString()}`;
+  const diffEl = document.getElementById('diffBadge');
+  diffEl.textContent  = puzzle.difficulty.toUpperCase();
+  diffEl.className    = `difficulty-badge diff-${puzzle.difficulty}`;
+
+  // combo display
+  for (let i = 0; i < 3; i++) {
+    document.getElementById(`seg${i}`).textContent = puzzle.dials[i].options[selections[i]];
+  }
+
+  // dials
+  const row = document.getElementById('dialsRow');
+  row.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    row.appendChild(buildDialEl(i));
+  }
+
+  // attempts row (pips)
+  const ar = document.getElementById('attemptsRow');
+  ar.innerHTML = '';
+  for (let a = 0; a < TOTAL_ATTEMPTS; a++) {
+    const pip = document.createElement('div');
+    pip.className = 'attempt-pip' + (a >= attemptsLeft ? ' spent' : '');
+    ar.appendChild(pip);
+  }
+
+  // handle
+  const hBtn = document.getElementById('handleBtn');
+  const hLbl = document.getElementById('handleLabel');
+  if (status !== 'playing') {
+    hBtn.disabled = true;
+    hLbl.textContent = status === 'won' ? 'Safe opened!' : 'Busted!';
+  } else {
+    hBtn.disabled = false;
+    hLbl.textContent = 'Pull to open';
+  }
+
+  // message
+  const msg = document.getElementById('messageArea');
+  if (status === 'playing' && attempts.length > 0) {
+    const last = attempts[attempts.length - 1];
+    const dists = last.distances;
+    const allClose = dists.every(d => d <= 1);
+    if (allClose) msg.textContent = '🔥 So close! You can almost feel the tumblers...';
+    else if (dists.every(d => d >= 3)) msg.textContent = '🧊 Ice cold. Try a completely different combination.';
+    else msg.textContent = '🔒 Wrong combination. Read the heat signals.';
+  } else if (status === 'playing') {
+    msg.textContent = 'Set the dials and pull the handle.';
+  }
+}
+
+function buildDialEl(i) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'dial-wrapper';
+  wrapper.id = `dw${i}`;
+
+  const dialDiv = document.createElement('div');
+  dialDiv.className = 'dial';
+  dialDiv.id = `dial${i}`;
+
+  // ring
+  const ring = document.createElement('div');
+  ring.className = 'dial-ring';
+  ring.id = `ring${i}`;
+
+  // ticks
+  const ticks = document.createElement('div');
+  ticks.className = 'dial-ticks';
+  ticks.id = `ticks${i}`;
+  ticks.style.transform = `rotate(${dialRotations[i]}deg)`;
+  for (let t = 0; t < 8; t++) {
+    const tick = document.createElement('div');
+    tick.className = 'tick' + (t === 0 ? ' major' : '');
+    tick.style.transform = `rotate(${t * 45}deg)`;
+    ticks.appendChild(tick);
+  }
+
+  // label
+  const label = document.createElement('div');
+  label.className = 'dial-label';
+  label.id = `dlabel${i}`;
+  label.textContent = puzzle.dials[i].options[gameState.selections[i]];
+
+  const notch = document.createElement('div');
+  notch.className = 'dial-notch';
+
+  ring.appendChild(ticks);
+  ring.appendChild(label);
+  ring.appendChild(notch);
+
+  // apply heat if attempts exist
+  applyHeat(ring, i);
+
+  dialDiv.appendChild(ring);
+  wrapper.appendChild(dialDiv);
+
+  // attempt dots
+  const dots = document.createElement('div');
+  dots.className = 'attempt-dots';
+  for (let a = 0; a < TOTAL_ATTEMPTS; a++) {
+    const dot = document.createElement('div');
+    dot.className = 'adot';
+    if (a < gameState.attempts.length) {
+      dot.classList.add(dotClass(gameState.attempts[a].distances[i]));
+    }
+    dots.appendChild(dot);
+  }
+  wrapper.appendChild(dots);
+
+  // buttons (disabled if not playing)
+  const btns = document.createElement('div');
+  btns.className = 'dial-btns';
+
+  const lBtn = document.createElement('button');
+  lBtn.className = 'dial-btn';
+  lBtn.textContent = '◄';
+  lBtn.disabled = gameState.status !== 'playing';
+  lBtn.onclick = () => spinDial(i, -1);
+
+  const rBtn = document.createElement('button');
+  rBtn.className = 'dial-btn';
+  rBtn.textContent = '►';
+  rBtn.disabled = gameState.status !== 'playing';
+  rBtn.onclick = () => spinDial(i, 1);
+
+  btns.appendChild(lBtn);
+  btns.appendChild(rBtn);
+  wrapper.appendChild(btns);
+
+  return wrapper;
+}
+
+function applyHeat(ringEl, i) {
+  if (gameState.attempts.length === 0) return;
+  const last = gameState.attempts[gameState.attempts.length - 1];
+  ringEl.classList.add(heatClass(last.distances[i]));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SPIN DIAL
+// ═══════════════════════════════════════════════════════════════
+function spinDial(i, dir) {
+  if (gameState.status !== 'playing') return;
+
+  // Update selection
+  gameState.selections[i] = (gameState.selections[i] + dir + 8) % 8;
+
+  // Visual rotation
+  dialRotations[i] += dir * 45;
+
+  // Animate
+  const dw = document.getElementById(`dw${i}`);
+  dw.classList.add('dial-spinning');
+  setTimeout(() => dw.classList.remove('dial-spinning'), 250);
+
+  const ticks = document.getElementById(`ticks${i}`);
+  if (ticks) ticks.style.transform = `rotate(${dialRotations[i]}deg)`;
+
+  const lbl = document.getElementById(`dlabel${i}`);
+  if (lbl) lbl.textContent = puzzle.dials[i].options[gameState.selections[i]];
+
+  const seg = document.getElementById(`seg${i}`);
+  if (seg) seg.textContent = puzzle.dials[i].options[gameState.selections[i]];
+
+  saveState();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PULL HANDLE
+// ═══════════════════════════════════════════════════════════════
+function pullHandle() {
+  if (gameState.status !== 'playing') return;
+
+  const { selections, attemptsLeft } = gameState;
+  const distances = selections.map((sel, i) => dialDist(sel, puzzle.dials[i].correctIdx));
+  const isWin = distances.every(d => d === 0);
+
+  gameState.attempts.push({ selections: [...selections], distances });
+  gameState.attemptsLeft--;
+
+  if (isWin) {
+    gameState.status = 'won';
+    gameState.stash += puzzle.value;
+    saveState();
+    render();
+    setTimeout(() => {
+      document.getElementById('safeBody').classList.add('safe-open');
+      setTimeout(() => showOverlay(true), 700);
+    }, 200);
+  } else if (gameState.attemptsLeft === 0) {
+    gameState.status = 'lost';
+    gameState.stash = 0; // busted!
+    saveState();
+    render();
+    document.getElementById('safeBody').classList.add('shaking');
+    setTimeout(() => {
+      document.getElementById('safeBody').classList.remove('shaking');
+      showOverlay(false);
+    }, 600);
+  } else {
+    saveState();
+    // shake + re-render with heat
+    document.getElementById('safeBody').classList.add('shaking');
+    setTimeout(() => {
+      document.getElementById('safeBody').classList.remove('shaking');
+      render();
+    }, 400);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// OVERLAY
+// ═══════════════════════════════════════════════════════════════
+function showOverlay(won) {
+  const card     = document.getElementById('overlayCard');
+  const emoji    = document.getElementById('overlayEmoji');
+  const title    = document.getElementById('overlayTitle');
+  const subtitle = document.getElementById('overlaySubtitle');
+  const shareBox = document.getElementById('shareBox');
+
+  card.className = 'overlay-card' + (won ? '' : ' busted');
+
+  if (won) {
+    const used = TOTAL_ATTEMPTS - gameState.attemptsLeft;
+    emoji.textContent = '🔓';
+    title.textContent = 'CRACKED IT!';
+    subtitle.textContent = `You opened the safe in ${used} attempt${used !== 1 ? 's' : ''} and pocketed $${puzzle.value.toLocaleString()}!`;
+  } else {
+    emoji.textContent = '🚨';
+    title.textContent = 'BUSTED!';
+    subtitle.textContent = `The alarm went off. You lost everything. Stash reset to $0.`;
+  }
+
+  shareBox.textContent = buildShareText(won);
+
+  document.getElementById('overlay').classList.add('visible');
+}
+
+function buildShareText(won) {
+  const day = dayNumber(gameState.dateStr);
+  const used = TOTAL_ATTEMPTS - gameState.attemptsLeft;
+  const lines = [];
+
+  lines.push(`🔐 WordSafe — Day #${day}`);
+  lines.push(won
+    ? `🔓 Opened in ${used}/${TOTAL_ATTEMPTS} attempt${used !== 1 ? 's' : ''}! +$${puzzle.value.toLocaleString()}`
+    : `🚨 Busted! 0/${TOTAL_ATTEMPTS}`);
+  lines.push('');
+
+  // Emoji grid per attempt per dial
+  const heatEmoji = (dist) => {
+    if (dist === 0) return '🟩';
+    if (dist === 1) return '🟧';
+    if (dist === 2) return '🟨';
+    if (dist === 3) return '🟦';
+    return '🟪';
+  };
+
+  for (const att of gameState.attempts) {
+    lines.push(att.distances.map(d => heatEmoji(d)).join(' '));
+  }
+
+  // If busted, show remaining blank attempts
+  if (!won) {
+    const blanks = TOTAL_ATTEMPTS - gameState.attempts.length;
+    for (let b = 0; b < blanks; b++) lines.push('⬛ ⬛ ⬛');
+  }
+
+  lines.push('');
+  lines.push(`Difficulty: ${puzzle.difficulty.toUpperCase()} | Prize: $${puzzle.value.toLocaleString()}`);
+  lines.push('wordsafe.game');
+
+  return lines.join('\n');
+}
+
+function copyShare() {
+  const text = document.getElementById('shareBox').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const hint = document.getElementById('copiedHint');
+    hint.textContent = '✓ Copied to clipboard!';
+    setTimeout(() => { hint.textContent = ''; }, 2500);
+  }).catch(() => {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    document.getElementById('copiedHint').textContent = '✓ Copied!';
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// KEYBOARD SUPPORT
+// ═══════════════════════════════════════════════════════════════
+let focusDial = 0;
+document.addEventListener('keydown', (e) => {
+  if (gameState.status !== 'playing') return;
+  if (e.key === 'ArrowLeft')  { spinDial(focusDial, -1); e.preventDefault(); }
+  if (e.key === 'ArrowRight') { spinDial(focusDial,  1); e.preventDefault(); }
+  if (e.key === 'Tab') {
+    focusDial = (focusDial + (e.shiftKey ? -1 : 1) + 3) % 3;
+    e.preventDefault();
+    highlightFocusDial();
+  }
+  if (e.key === 'Enter' || e.key === ' ') { pullHandle(); e.preventDefault(); }
+  if (e.key === '1') focusDial = 0;
+  if (e.key === '2') focusDial = 1;
+  if (e.key === '3') focusDial = 2;
+});
+
+function highlightFocusDial() {
+  for (let i = 0; i < 3; i++) {
+    const ring = document.getElementById(`ring${i}`);
+    if (!ring) continue;
+    ring.style.outline = i === focusDial ? '3px solid #d4b84a' : '';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+loadState();
+render();
+
+// If game already over, show overlay immediately
+if (gameState.status !== 'playing') {
+  setTimeout(() => showOverlay(gameState.status === 'won'), 300);
+}
+</script>
+</body>
+</html>
