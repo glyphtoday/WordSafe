@@ -8,13 +8,13 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --door:      #2e3d2e;
-      --slot:      #1c291c;
-      --text-on:   #ddeacc;
-      --text-off:  rgba(180, 220, 150, 0.22);
-      --gold:      #c8a830;
-      --gold-dk:   #6a5610;
-      --item-h:    72px;
+      --door:    #2e3d2e;
+      --slot:    #1c291c;
+      --text-on: #ddeacc;
+      --text-off:rgba(180, 220, 150, 0.22);
+      --gold:    #c8a830;
+      --gold-dk: #6a5610;
+      --item-h:  72px;
     }
 
     body {
@@ -30,7 +30,6 @@
       -webkit-user-select: none;
     }
 
-    /* ── faint title ── */
     .wordmark {
       letter-spacing: 8px;
       font-size: 0.65rem;
@@ -39,7 +38,7 @@
       margin-bottom: 52px;
     }
 
-    /* ── drums wrapper ── */
+    /* ── lock body ── */
     .lock-body {
       position: relative;
       display: flex;
@@ -47,21 +46,19 @@
       gap: 12px;
     }
 
-    /* horizontal bar that sits across all drums at center height */
     .center-bar {
       position: absolute;
-      left: -18px;
-      right: -18px;
+      left: -18px; right: -18px;
       top: 50%;
       height: var(--item-h);
       transform: translateY(-50%);
-      border-top: 1px solid rgba(255, 255, 255, 0.09);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+      border-top: 1px solid rgba(255,255,255,0.09);
+      border-bottom: 1px solid rgba(255,255,255,0.09);
       pointer-events: none;
       z-index: 0;
     }
 
-    /* ── single drum column ── */
+    /* ── drum column ── */
     .drum-col {
       position: relative;
       z-index: 1;
@@ -71,46 +68,32 @@
       gap: 14px;
     }
 
-    /* drum viewport */
     .drum-window {
       width: 92px;
       height: calc(var(--item-h) * 3);
       overflow: hidden;
       border-radius: 8px;
       background: var(--slot);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255,255,255,0.06);
       position: relative;
       cursor: pointer;
-      /* fade top and bottom edges */
-      -webkit-mask-image: linear-gradient(
-        to bottom,
-        transparent 0%,
-        black 26%,
-        black 74%,
-        transparent 100%
-      );
-      mask-image: linear-gradient(
-        to bottom,
-        transparent 0%,
-        black 26%,
-        black 74%,
-        transparent 100%
-      );
-      transition: border-color 0.35s, box-shadow 0.35s;
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 26%, black 74%, transparent 100%);
+      mask-image: linear-gradient(to bottom, transparent 0%, black 26%, black 74%, transparent 100%);
+      transition: border-color 0.35s, box-shadow 0.35s, outline 0.1s;
+      outline: 2px solid transparent;
+      outline-offset: 2px;
+    }
+    .drum-window.kbd-focus {
+      outline-color: rgba(200, 220, 140, 0.5);
     }
 
-    /* click zones: invisible top/bottom halves */
-    .drum-zone-up,
-    .drum-zone-down {
-      position: absolute;
-      left: 0; right: 0;
-      height: 50%;
-      z-index: 10;
+    /* click zones */
+    .drum-zone-up, .drum-zone-down {
+      position: absolute; left: 0; right: 0; height: 50%; z-index: 10;
     }
     .drum-zone-up   { top: 0; }
     .drum-zone-down { bottom: 0; }
 
-    /* scrolling track — 5 items */
     .drum-track {
       display: flex;
       flex-direction: column;
@@ -129,14 +112,10 @@
       letter-spacing: 4px;
       color: var(--text-off);
       flex-shrink: 0;
-      transition: color 0.15s;
     }
-    .drum-item.is-current {
-      color: var(--text-on);
-      font-size: 1.7rem;
-    }
+    .drum-item.is-current { color: var(--text-on); font-size: 1.7rem; }
 
-    /* heat states on drum-window */
+    /* heat states */
     .drum-window.h-correct { border-color: #3ddc3d; box-shadow: 0 0 20px rgba(61,220,61,0.25); }
     .drum-window.h-hot     { border-color: #ff5020; box-shadow: 0 0 20px rgba(255,80,32,0.25); }
     .drum-window.h-warm    { border-color: #ffa020; box-shadow: 0 0 20px rgba(255,160,32,0.25); }
@@ -144,161 +123,120 @@
     .drum-window.h-cold    { border-color: #6060ee; box-shadow: 0 0 20px rgba(96,96,238,0.25); }
 
     /* ── attempt dots ── */
-    .attempt-dots {
-      display: flex;
-      gap: 7px;
-    }
+    .attempt-dots { display: flex; gap: 7px; }
     .adot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.08);
+      width: 8px; height: 8px; border-radius: 50%;
+      background: rgba(255,255,255,0.08);
       transition: background 0.3s, box-shadow 0.3s;
     }
-    .adot.h-correct { background: #3ddc3d; box-shadow: 0 0 5px #3ddc3d; }
-    .adot.h-hot     { background: #ff5020; box-shadow: 0 0 5px #ff5020; }
-    .adot.h-warm    { background: #ffa020; box-shadow: 0 0 5px #ffa020; }
-    .adot.h-cool    { background: #40aaee; box-shadow: 0 0 5px #40aaee; }
-    .adot.h-cold    { background: #6060ee; box-shadow: 0 0 5px #6060ee; }
+    .adot.h-correct { background:#3ddc3d; box-shadow:0 0 5px #3ddc3d; }
+    .adot.h-hot     { background:#ff5020; box-shadow:0 0 5px #ff5020; }
+    .adot.h-warm    { background:#ffa020; box-shadow:0 0 5px #ffa020; }
+    .adot.h-cool    { background:#40aaee; box-shadow:0 0 5px #40aaee; }
+    .adot.h-cold    { background:#6060ee; box-shadow:0 0 5px #6060ee; }
 
     /* ── handle ── */
-    .handle-wrap {
-      margin-top: 52px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-
+    .handle-wrap { margin-top: 52px; display:flex; flex-direction:column; align-items:center; gap:10px; }
     .handle-btn {
-      display: flex;
-      align-items: center;
-      background: none;
-      border: none;
-      padding: 0;
-      cursor: pointer;
+      display: flex; align-items: center;
+      background: none; border: none; padding: 0; cursor: pointer;
       transition: transform 0.15s ease;
     }
     .handle-btn:active:not([disabled]) { transform: translateX(12px); }
     .handle-btn[disabled] { opacity: 0.38; cursor: default; }
-
     .handle-tab {
-      width: 14px;
-      height: 52px;
+      width: 14px; height: 52px;
       background: var(--door);
       border: 1px solid rgba(255,255,255,0.08);
       border-right: none;
       border-radius: 4px 0 0 4px;
     }
     .handle-grip {
-      width: 80px;
-      height: 36px;
+      width: 80px; height: 36px;
       background: var(--gold);
       border: 2px solid var(--gold-dk);
       border-radius: 0 18px 18px 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.58rem;
-      font-weight: bold;
-      letter-spacing: 3px;
-      color: rgba(0, 0, 0, 0.45);
-      text-transform: uppercase;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.58rem; font-weight: bold; letter-spacing: 3px;
+      color: rgba(0,0,0,0.45); text-transform: uppercase;
+    }
+    .handle-hint {
+      font-size: 0.6rem; letter-spacing: 3px;
+      color: rgba(200,230,170,0.18); text-transform: uppercase;
     }
 
-    .handle-hint {
-      font-size: 0.6rem;
-      letter-spacing: 3px;
-      color: rgba(200, 230, 170, 0.18);
-      text-transform: uppercase;
+    /* ── test mode banner ── */
+    .test-banner {
+      position: fixed;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,200,0,0.3);
+      border-radius: 6px;
+      padding: 6px 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      color: rgba(255,200,80,0.8);
+      display: none;
+      text-align: center;
+      z-index: 50;
     }
+    .test-banner.visible { display: block; }
 
     /* ── shake ── */
     @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      18%      { transform: translateX(-10px); }
-      36%      { transform: translateX(10px); }
-      54%      { transform: translateX(-7px); }
-      72%      { transform: translateX(7px); }
-      90%      { transform: translateX(-3px); }
+      0%,100% { transform: translateX(0); }
+      18% { transform: translateX(-10px); }
+      36% { transform: translateX(10px); }
+      54% { transform: translateX(-7px); }
+      72% { transform: translateX(7px); }
+      90% { transform: translateX(-3px); }
     }
     .shaking { animation: shake 0.42s ease; }
 
     /* ── overlay ── */
     .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(14, 20, 14, 0.93);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.4s;
+      position: fixed; inset: 0;
+      background: rgba(14,20,14,0.93);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.4s;
     }
-    .overlay.visible {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .ov-card {
-      text-align: center;
-      padding: 44px 36px;
-      max-width: 360px;
-      width: 90%;
-    }
-    .ov-emoji  { font-size: 3.2rem; margin-bottom: 14px; }
-    .ov-title  {
-      font-size: 1.5rem;
-      font-weight: bold;
-      letter-spacing: 5px;
-      color: var(--gold);
-      text-transform: uppercase;
-      margin-bottom: 6px;
+    .overlay.visible { opacity: 1; pointer-events: all; }
+    .ov-card { text-align: center; padding: 44px 36px; max-width: 360px; width: 90%; }
+    .ov-emoji { font-size: 3.2rem; margin-bottom: 14px; }
+    .ov-title {
+      font-size: 1.5rem; font-weight: bold; letter-spacing: 5px;
+      color: var(--gold); text-transform: uppercase; margin-bottom: 6px;
     }
     .ov-bust .ov-title { color: #ff5555; }
     .ov-sub {
-      font-size: 0.8rem;
-      letter-spacing: 1px;
-      color: rgba(200, 220, 170, 0.45);
-      margin-bottom: 26px;
-      line-height: 1.6;
+      font-size: 0.8rem; letter-spacing: 1px;
+      color: rgba(200,220,170,0.45); margin-bottom: 26px; line-height: 1.7;
+    }
+    .ov-answer {
+      font-family: 'Courier New', monospace;
+      font-size: 1.05rem; font-weight: bold; letter-spacing: 5px;
+      color: rgba(255,180,80,0.85);
     }
     .share-box {
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 8px;
-      padding: 16px 18px;
-      font-family: monospace;
-      font-size: 0.85rem;
-      color: rgba(210, 240, 185, 0.75);
-      line-height: 1.9;
-      margin-bottom: 18px;
-      white-space: pre-wrap;
-      text-align: left;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px; padding: 16px 18px;
+      font-family: monospace; font-size: 0.85rem;
+      color: rgba(210,240,185,0.75); line-height: 1.9;
+      margin-bottom: 18px; white-space: pre-wrap; text-align: left;
     }
     .btn-copy {
-      background: var(--gold);
-      border: none;
-      border-radius: 8px;
-      padding: 11px 32px;
-      font-family: 'Georgia', serif;
-      font-size: 0.78rem;
-      font-weight: bold;
-      letter-spacing: 3px;
-      color: rgba(0, 0, 0, 0.55);
-      cursor: pointer;
-      text-transform: uppercase;
+      background: var(--gold); border: none; border-radius: 8px;
+      padding: 11px 32px; font-family: 'Georgia', serif;
+      font-size: 0.78rem; font-weight: bold; letter-spacing: 3px;
+      color: rgba(0,0,0,0.55); cursor: pointer; text-transform: uppercase;
       transition: opacity 0.1s;
     }
     .btn-copy:hover { opacity: 0.82; }
-    .copied-hint {
-      margin-top: 9px;
-      font-size: 0.68rem;
-      color: rgba(130, 210, 100, 0.6);
-      letter-spacing: 1px;
-      min-height: 16px;
-    }
+    .copied-hint { margin-top:9px; font-size:0.68rem; color:rgba(130,210,100,0.6); letter-spacing:1px; min-height:16px; }
   </style>
 </head>
 <body>
@@ -307,7 +245,6 @@
 
 <div class="lock-body" id="lockBody">
   <div class="center-bar"></div>
-  <!-- drum columns inserted by JS -->
 </div>
 
 <div class="handle-wrap">
@@ -317,6 +254,8 @@
   </button>
   <div class="handle-hint" id="handleHint">pull to open</div>
 </div>
+
+<div class="test-banner" id="testBanner"></div>
 
 <div class="overlay" id="overlay">
   <div class="ov-card" id="ovCard">
@@ -334,7 +273,6 @@
 // WORD LIST
 // ═══════════════════════════════════════════════════════════════
 const WORDS = [
-  // Easy $500
   { word:'BASKET', difficulty:'easy',   value:500  },
   { word:'WINTER', difficulty:'easy',   value:500  },
   { word:'FLOWER', difficulty:'easy',   value:500  },
@@ -365,7 +303,6 @@ const WORDS = [
   { word:'NAPKIN', difficulty:'easy',   value:500  },
   { word:'PARROT', difficulty:'easy',   value:500  },
   { word:'RABBIT', difficulty:'easy',   value:500  },
-  // Medium $1000
   { word:'BOUNCE', difficulty:'medium', value:1000 },
   { word:'SHRINK', difficulty:'medium', value:1000 },
   { word:'TURNIP', difficulty:'medium', value:1000 },
@@ -396,7 +333,6 @@ const WORDS = [
   { word:'ZEALOT', difficulty:'medium', value:1000 },
   { word:'BLOTCH', difficulty:'medium', value:1000 },
   { word:'CLUTCH', difficulty:'medium', value:1000 },
-  // Hard $2000
   { word:'SCULPT', difficulty:'hard',   value:2000 },
   { word:'EXEMPT', difficulty:'hard',   value:2000 },
   { word:'ABRUPT', difficulty:'hard',   value:2000 },
@@ -407,8 +343,6 @@ const WORDS = [
   { word:'SMUDGE', difficulty:'hard',   value:2000 },
   { word:'CYGNET', difficulty:'hard',   value:2000 },
   { word:'KVETCH', difficulty:'hard',   value:2000 },
-  { word:'PHLEGM', difficulty:'hard',   value:2000 },
-  { word:'FLYSCH', difficulty:'hard',   value:2000 },
   { word:'THATCH', difficulty:'hard',   value:2000 },
   { word:'SPRITZ', difficulty:'hard',   value:2000 },
   { word:'STYMIE', difficulty:'hard',   value:2000 },
@@ -416,25 +350,86 @@ const WORDS = [
 ].filter(w => w.word.length === 6);
 
 // ═══════════════════════════════════════════════════════════════
-// DIGRAM POOLS (by position)
+// DIGRAM POOLS — carefully curated by position in 6-letter words
 // ═══════════════════════════════════════════════════════════════
 const POOL = [
-  ['BA','BE','BI','BL','BO','BR','BU','CA','CH','CL','CO','CR','DE','DI','DO',
-   'DR','EX','FL','FO','FR','GA','GL','GO','GR','HA','HE','HI','HO','HU','IN',
-   'JO','KI','LA','LE','LI','LO','MA','ME','MI','MO','MU','NO','PA','PL','PO',
-   'PR','PU','QU','RA','RE','RO','SA','SC','SE','SH','SI','SK','SL','SM','SN',
-   'SO','SP','SQ','ST','SU','SW','TA','TE','TH','TI','TO','TR','TU','TW','UN',
-   'VA','WA','WH','WI','WO','ZE','ZI'],
-  ['ND','NG','NK','NT','LL','PP','TT','RR','SS','FF','CK','CT','LT','MP','RT',
-   'ST','NN','TH','SH','CH','RI','LE','IN','AN','AR','ER','OR','ON','UN','AL',
-   'EN','AT','OT','OW','OL','OU','IR','UR','IS','IT','IG','LU','LO','LA','LI',
-   'RU','RA','ET','EL','EM','IM','IP','AM','AP','AY','EY','EW','EE','OO','AU',
-   'GG','BB','DD','MM','EI','IE','UI','OI','ZZ','WL','WN','WI','GL','PL','BL'],
-  ['ER','ED','EN','ES','LY','AL','EL','ON','OR','OT','IN','AN','AT','LE','ND',
-   'NG','NT','NK','MP','RD','RT','LT','GE','CE','SE','TE','DE','VE','KE','RE',
-   'HT','CH','SH','TH','FT','ST','SK','SS','LL','OW','OY','AY','EY','EW','EE',
-   'OO','IP','IT','IS','UM','US','UT','ID','UP','AM','AS','OX','PH','ET','EK',
-   'GY','RY','NY','TY','BY','DY','FY','PY','SY','ZE','XE','PE','ME'],
+  // ── Position 0: first 2 letters ──
+  // Standard word-opening patterns in English 6-letter words
+  ['AB','AC','AD','AF','AG','AL','AM','AN','AP','AR','AS','AT',
+   'BA','BE','BI','BL','BO','BR','BU',
+   'CA','CH','CL','CO','CR','CY',
+   'DA','DE','DI','DO','DR',
+   'EL','EN','EV','EX',
+   'FA','FI','FL','FO','FR','FU',
+   'GA','GL','GO','GR',
+   'HA','HE','HI','HO','HU',
+   'IM','IN',
+   'JO','JU',
+   'KI',
+   'LA','LE','LI','LO',
+   'MA','ME','MI','MO','MU',
+   'NA','NI','NO',
+   'OB','OR','OY',
+   'PA','PE','PH','PI','PL','PO','PR','PU',
+   'QU',
+   'RA','RE','RI','RO',
+   'SA','SC','SE','SH','SI','SK','SL','SM','SN','SO','SP','SQ','ST','SU','SW',
+   'TA','TE','TH','TI','TO','TR','TU',
+   'UN','UP',
+   'VA','VE','VI',
+   'WA','WH','WI','WO',
+   'YO',
+   'ZE','ZI'],
+
+  // ── Position 1: letters 3–4 (word middle) ──
+  // Based on actual digrams that appear at positions 3–4 in English 6-letter words.
+  // Excludes syllable-opening patterns (QU, WH, WR, KN) that rarely appear mid-word.
+  ['AL','AM','AN','AP','AR','AT',
+   'BB',
+   'CK','CT',
+   'DD',
+   'EE','EL','EM','EN','ER','ET',
+   'FF','FT',
+   'GG','GN','GU',
+   'IG','IL','IM','IN','IP','IR','IT','IV',
+   'LA','LE','LI','LK','LL','LN','LO','LT','LU','LV',
+   'MB','MM','MP',
+   'NC','ND','NG','NK','NN','NT',
+   'OB','OD','OI','OL','OM','ON','OO','OP','OR','OT','OW','OX','OZ',
+   'PK','PP',
+   'RD','RI','RK','RL','RM','RN','RO','RP','RR','RS','RT','RU','RV',
+   'SC','SE','SI','SK','SL','SM','SN','SO','SP','SS','ST',
+   'TA','TE','TH','TI','TT','TU',
+   'UD','UI','UL','UM','UN','UR','UT',
+   'VE','VI','VO',
+   'WA','WI',
+   'YM','YS',
+   'ZA','ZZ'],
+
+  // ── Position 2: letters 5–6 (word endings) ──
+  // Patterns that commonly end 6-letter English words
+  ['AL','AM','AN','AR','AS','AT','AY',
+   'BS',
+   'CE','CH',
+   'CT',
+   'DE',
+   'ED','EE','EL','EN','ER','ES','ET','EX','EY',
+   'FT',
+   'GE','GM','GY',
+   'HT','HY',
+   'ID','IE','IL','IN','IP','IT',
+   'KE',
+   'LD','LE','LT','LY',
+   'MB','MP',
+   'ND','NG','NK','NT',
+   'OD','ON','OR','OT','OW','OY',
+   'PT','PY',
+   'RD','RE','RK','RM','RN','RT','RY',
+   'SE','SH','SK','SS','ST',
+   'TE','TH','TY','TZ',
+   'UM','US','UT',
+   'VE',
+   'ZE'],
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -454,34 +449,36 @@ function shuffleArr(arr, rng) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// DATE UTILITIES
+// DATE
 // ═══════════════════════════════════════════════════════════════
 function todayUTC() {
   const d = new Date();
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
 }
-function dateSeed(s) { return s.split('-').reduce((a, n, i) => a + parseInt(n) * [10000,100,1][i], 0); }
-function dayNumber(s) {
-  return Math.floor((new Date(s+'T00:00:00Z') - new Date('2025-01-01')) / 86400000) + 1;
-}
+function dateSeed(s) { return s.split('-').reduce((a,n,i) => a + parseInt(n)*[10000,100,1][i], 0); }
+function dayNumber(s) { return Math.floor((new Date(s+'T00:00:00Z') - new Date('2025-01-01'))/86400000)+1; }
 
 // ═══════════════════════════════════════════════════════════════
-// BUILD DAILY PUZZLE
+// BUILD PUZZLE
 // ═══════════════════════════════════════════════════════════════
-function buildPuzzle(dateStr) {
-  const seed = dateSeed(dateStr);
-  const wordObj = shuffleArr(WORDS, makeRng(seed ^ 0xDEADBEEF))[0];
+function buildDialsForWord(wordObj, seed) {
   const word    = wordObj.word;
   const digrams = [word.slice(0,2), word.slice(2,4), word.slice(4,6)];
-
-  const dials = digrams.map((correct, pos) => {
+  const dials   = digrams.map((correct, pos) => {
     const pool    = POOL[pos].filter(d => d !== correct);
-    const options = shuffleArr([correct, ...shuffleArr(pool, makeRng(seed ^ (pos*0x1337+0xCAFE))).slice(0,7)],
-                               makeRng(seed ^ (pos*0xABCD)));
+    const options = shuffleArr(
+      [correct, ...shuffleArr(pool, makeRng(seed ^ (pos*0x1337+0xCAFE))).slice(0,7)],
+      makeRng(seed ^ (pos*0xABCD))
+    );
     return { options, correctIdx: options.indexOf(correct) };
   });
+  return { ...wordObj, digrams, dials };
+}
 
-  return { ...wordObj, digrams, dials, dateStr };
+function buildPuzzle(dateStr) {
+  const seed    = dateSeed(dateStr);
+  const wordObj = shuffleArr(WORDS, makeRng(seed ^ 0xDEADBEEF))[0];
+  return { ...buildDialsForWord(wordObj, seed), dateStr };
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -491,16 +488,14 @@ const ATTEMPTS_TOTAL = 4;
 const STASH_KEY = 'wordsafe_stash';
 const STATE_KEY = 'wordsafe_state';
 
-let puzzle, gs; // gs = game state
+let puzzle, gs;
 
 function loadState() {
   const today = todayUTC();
   puzzle = buildPuzzle(today);
-
   const stash = (() => { const v = parseInt(localStorage.getItem(STASH_KEY)); return isNaN(v) ? 1000 : v; })();
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(STATE_KEY)); } catch(e) {}
-
   if (saved && saved.dateStr === today) {
     gs = { ...saved, stash };
   } else {
@@ -509,6 +504,7 @@ function loadState() {
   }
 }
 function saveState() {
+  if (testMode) return; // never overwrite real state during testing
   const { stash, ...rest } = gs;
   try { localStorage.setItem(STATE_KEY, JSON.stringify(rest)); localStorage.setItem(STASH_KEY, String(gs.stash)); } catch(e) {}
 }
@@ -516,17 +512,16 @@ function saveState() {
 // ═══════════════════════════════════════════════════════════════
 // HEAT
 // ═══════════════════════════════════════════════════════════════
-function dialDist(a, b)   { const d = Math.abs(a-b); return Math.min(d, 8-d); }
-function heatClass(dist)  { return ['h-correct','h-hot','h-warm','h-cool','h-cold'][Math.min(dist,4)]; }
+function dialDist(a, b)  { const d = Math.abs(a-b); return Math.min(d, 8-d); }
+function heatClass(dist) { return ['h-correct','h-hot','h-warm','h-cool','h-cold'][Math.min(dist,4)]; }
 
 // ═══════════════════════════════════════════════════════════════
-// DRUM DOM HELPERS
+// DRUM HELPERS
 // ═══════════════════════════════════════════════════════════════
-const ITEM_H = 72; // must match --item-h
+const ITEM_H = 72;
 
 function optAt(dialIdx, offset) {
-  const sel  = gs.selections[dialIdx];
-  const idx  = ((sel + offset) % 8 + 8) % 8;
+  const idx = ((gs.selections[dialIdx] + offset) % 8 + 8) % 8;
   return puzzle.dials[dialIdx].options[idx];
 }
 
@@ -534,9 +529,8 @@ function updateDrumItems(i) {
   const track = document.getElementById(`track${i}`);
   if (!track) return;
   const items = track.querySelectorAll('.drum-item');
-  // track has 5 items: offsets -2, -1, 0, +1, +2
   [-2,-1,0,1,2].forEach((off, j) => {
-    items[j].textContent  = optAt(i, off);
+    items[j].textContent = optAt(i, off);
     items[j].classList.toggle('is-current', off === 0);
   });
 }
@@ -544,19 +538,38 @@ function updateDrumItems(i) {
 function applyHeatToDrum(i) {
   const win = document.getElementById(`win${i}`);
   if (!win || gs.attempts.length === 0) return;
-  // clear previous
   win.classList.remove('h-correct','h-hot','h-warm','h-cool','h-cold');
-  const dist = gs.attempts[gs.attempts.length-1].distances[i];
-  win.classList.add(heatClass(dist));
+  win.classList.add(heatClass(gs.attempts[gs.attempts.length-1].distances[i]));
 }
 
 function updateAttemptDots(i) {
   const row = document.getElementById(`dots${i}`);
   if (!row) return;
-  const dots = row.querySelectorAll('.adot');
-  gs.attempts.forEach((att, a) => {
-    dots[a].className = 'adot ' + heatClass(att.distances[i]);
+  row.querySelectorAll('.adot').forEach((dot, a) => {
+    dot.className = 'adot' + (a < gs.attempts.length ? ' ' + heatClass(gs.attempts[a].distances[i]) : '');
   });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// KEYBOARD FOCUS
+// ═══════════════════════════════════════════════════════════════
+let focusDial = 0;
+let kbdActive = false;
+
+function setFocus(i) {
+  focusDial = ((i % 3) + 3) % 3;
+  kbdActive = true;
+  for (let j = 0; j < 3; j++) {
+    const win = document.getElementById(`win${j}`);
+    if (win) win.classList.toggle('kbd-focus', j === focusDial);
+  }
+}
+function clearKbd() {
+  kbdActive = false;
+  for (let j = 0; j < 3; j++) {
+    const win = document.getElementById(`win${j}`);
+    if (win) win.classList.remove('kbd-focus');
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -565,16 +578,13 @@ function updateAttemptDots(i) {
 const spinning = [false, false, false];
 
 function spinDial(i, dir) {
-  // dir: +1 = next (scroll up), -1 = prev (scroll down)
+  // dir: +1 = next (scroll down), -1 = prev (scroll up)
   if (spinning[i] || gs.status !== 'playing') return;
   spinning[i] = true;
-
   const track  = document.getElementById(`track${i}`);
   const target = dir === 1 ? -2 * ITEM_H : 0;
-
-  track.style.transition = `transform 0.15s ease`;
+  track.style.transition = 'transform 0.15s ease';
   track.style.transform  = `translateY(${target}px)`;
-
   setTimeout(() => {
     gs.selections[i] = ((gs.selections[i] + dir) % 8 + 8) % 8;
     track.style.transition = 'none';
@@ -590,27 +600,21 @@ function spinDial(i, dir) {
 // ═══════════════════════════════════════════════════════════════
 function buildDrums() {
   const lb = document.getElementById('lockBody');
-  // remove old drum columns (keep center-bar)
   lb.querySelectorAll('.drum-col').forEach(el => el.remove());
 
   for (let i = 0; i < 3; i++) {
     const col = document.createElement('div');
     col.className = 'drum-col';
 
-    // window
     const win = document.createElement('div');
     win.className = 'drum-window';
     win.id = `win${i}`;
 
-    // click zones
-    const zUp   = document.createElement('div');
-    zUp.className   = 'drum-zone-up';
-    zUp.onclick = () => spinDial(i, -1);
-    const zDown = document.createElement('div');
-    zDown.className = 'drum-zone-down';
-    zDown.onclick = () => spinDial(i, +1);
+    const zUp   = document.createElement('div'); zUp.className   = 'drum-zone-up';
+    const zDown = document.createElement('div'); zDown.className = 'drum-zone-down';
+    zUp.onclick   = () => { clearKbd(); spinDial(i, -1); };
+    zDown.onclick = () => { clearKbd(); spinDial(i, +1); };
 
-    // track
     const track = document.createElement('div');
     track.className = 'drum-track';
     track.id = `track${i}`;
@@ -630,38 +634,35 @@ function buildDrums() {
     // scroll wheel
     win.addEventListener('wheel', e => {
       e.preventDefault();
+      clearKbd();
       spinDial(i, e.deltaY > 0 ? 1 : -1);
     }, { passive: false });
 
     // touch swipe
-    let touchStartY = null;
-    win.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
-    win.addEventListener('touchend', e => {
-      if (touchStartY === null) return;
-      const dy = touchStartY - e.changedTouches[0].clientY;
-      if (Math.abs(dy) > 12) spinDial(i, dy > 0 ? 1 : -1);
-      touchStartY = null;
+    let ty0 = null;
+    win.addEventListener('touchstart', e => { ty0 = e.touches[0].clientY; }, { passive: true });
+    win.addEventListener('touchend',   e => {
+      if (ty0 === null) return;
+      const dy = ty0 - e.changedTouches[0].clientY;
+      if (Math.abs(dy) > 12) { clearKbd(); spinDial(i, dy > 0 ? 1 : -1); }
+      ty0 = null;
     }, { passive: true });
 
     col.appendChild(win);
 
-    // attempt dots
     const dots = document.createElement('div');
-    dots.className = 'attempt-dots';
-    dots.id = `dots${i}`;
+    dots.className = 'attempt-dots'; dots.id = `dots${i}`;
     for (let a = 0; a < ATTEMPTS_TOTAL; a++) {
-      const d = document.createElement('div');
-      d.className = 'adot';
-      dots.appendChild(d);
+      const d = document.createElement('div'); d.className = 'adot'; dots.appendChild(d);
     }
     col.appendChild(dots);
 
     lb.appendChild(col);
-
-    // restore heat if game already in progress
     applyHeatToDrum(i);
     updateAttemptDots(i);
   }
+
+  if (kbdActive) setFocus(focusDial);
 }
 
 function refreshHandleState() {
@@ -672,7 +673,7 @@ function refreshHandleState() {
     hint.textContent = gs.status === 'won' ? 'safe opened' : 'busted';
   } else {
     btn.disabled = false;
-    hint.textContent = 'pull to open';
+    hint.textContent = testMode ? 'pull to test' : 'pull to open';
   }
 }
 
@@ -688,11 +689,7 @@ function pullHandle() {
   gs.attempts.push({ selections: [...gs.selections], distances });
   gs.attemptsLeft--;
 
-  // update dots & heat
-  for (let i = 0; i < 3; i++) {
-    applyHeatToDrum(i);
-    updateAttemptDots(i);
-  }
+  for (let i = 0; i < 3; i++) { applyHeatToDrum(i); updateAttemptDots(i); }
 
   if (isWin) {
     gs.status = 'won';
@@ -723,14 +720,15 @@ function pullHandle() {
 function showOverlay(won) {
   const card = document.getElementById('ovCard');
   card.className = 'ov-card' + (won ? '' : ' ov-bust');
-
   document.getElementById('ovEmoji').textContent = won ? '🔓' : '🚨';
   document.getElementById('ovTitle').textContent = won ? 'CRACKED IT' : 'BUSTED';
 
   const used = ATTEMPTS_TOTAL - gs.attemptsLeft;
-  document.getElementById('ovSub').textContent = won
-    ? `Opened in ${used} attempt${used!==1?'s':''} · +$${puzzle.value.toLocaleString()} · Stash: $${gs.stash.toLocaleString()}`
-    : `Failed to crack it · Stash wiped · $0 remaining`;
+  const answerLine = won ? '' : `<br><span class="ov-answer">${puzzle.word}</span><br><span style="font-size:.7rem;letter-spacing:3px;color:rgba(255,200,80,0.5)">${puzzle.digrams.join(' · ')}</span>`;
+
+  document.getElementById('ovSub').innerHTML = won
+    ? `Opened in ${used} attempt${used!==1?'s':''}&nbsp;·&nbsp;+$${puzzle.value.toLocaleString()}&nbsp;·&nbsp;Stash: $${gs.stash.toLocaleString()}`
+    : `Failed to crack it&nbsp;·&nbsp;Stash wiped${answerLine}`;
 
   document.getElementById('shareBox').textContent = buildShareText(won);
   document.getElementById('overlay').classList.add('visible');
@@ -740,7 +738,7 @@ function buildShareText(won) {
   const day  = dayNumber(gs.dateStr);
   const used = ATTEMPTS_TOTAL - gs.attemptsLeft;
   const heat = d => ['🟩','🟧','🟨','🟦','🟪'][Math.min(d,4)];
-  const lines = [
+  return [
     `🔐 WordSafe — Day #${day}`,
     won ? `🔓 Opened ${used}/${ATTEMPTS_TOTAL} · +$${puzzle.value.toLocaleString()}`
         : `🚨 Busted  0/${ATTEMPTS_TOTAL}`,
@@ -750,38 +748,86 @@ function buildShareText(won) {
     '',
     `${puzzle.difficulty.toUpperCase()} · $${puzzle.value.toLocaleString()} prize`,
     'wordsafe.game',
-  ];
-  return lines.join('\n');
+  ].join('\n');
 }
 
 function copyShare() {
   const text = document.getElementById('shareBox').textContent;
   const hint = document.getElementById('copiedHint');
   const show = () => { hint.textContent = '✓ Copied'; setTimeout(() => { hint.textContent = ''; }, 2500); };
-  navigator.clipboard ? navigator.clipboard.writeText(text).then(show).catch(() => fallbackCopy(text, show))
+  navigator.clipboard ? navigator.clipboard.writeText(text).then(show).catch(() => fallbackCopy(text,show))
                       : fallbackCopy(text, show);
 }
 function fallbackCopy(text, cb) {
   const t = document.createElement('textarea');
-  t.value = text; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t);
-  cb();
+  t.value = text; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); cb();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TEST MODE  (press T to cycle through random words)
+// ═══════════════════════════════════════════════════════════════
+let testMode    = false;
+let testWords   = [];
+let testWordIdx = -1;
+let savedGs     = null;
+let savedPuzzle = null;
+
+function nextTestWord() {
+  if (!testMode) {
+    // Enter test mode — save real state
+    testMode    = true;
+    savedGs     = JSON.parse(JSON.stringify(gs));
+    savedPuzzle = puzzle;
+    testWords   = shuffleArr(WORDS, makeRng(Date.now() >>> 0));
+    testWordIdx = -1;
+  }
+  testWordIdx = (testWordIdx + 1) % testWords.length;
+  const w   = testWords[testWordIdx];
+  puzzle    = { ...buildDialsForWord(w, Date.now() ^ testWordIdx), dateStr: gs.dateStr };
+  gs        = { ...gs, selections:[0,0,0], attempts:[], attemptsLeft:ATTEMPTS_TOTAL, status:'playing' };
+  buildDrums();
+  refreshHandleState();
+  document.getElementById('overlay').classList.remove('visible');
+
+  const banner = document.getElementById('testBanner');
+  banner.classList.add('visible');
+  banner.textContent = `⚙ TEST  ${puzzle.word}  ${puzzle.digrams.join('·')}  ${puzzle.difficulty.toUpperCase()}  $${puzzle.value}`;
+}
+
+function exitTestMode() {
+  if (!testMode) return;
+  testMode = false;
+  puzzle   = savedPuzzle;
+  gs       = savedGs;
+  buildDrums();
+  refreshHandleState();
+  document.getElementById('overlay').classList.remove('visible');
+  document.getElementById('testBanner').classList.remove('visible');
+  if (gs.status !== 'playing') setTimeout(() => showOverlay(gs.status === 'won'), 300);
 }
 
 // ═══════════════════════════════════════════════════════════════
 // KEYBOARD
 // ═══════════════════════════════════════════════════════════════
-let focusDial = 0;
 document.addEventListener('keydown', e => {
+  if (e.key === 't' || e.key === 'T') { nextTestWord(); return; }
+  if (e.key === 'Escape')             { exitTestMode(); return; }
+
   if (gs.status !== 'playing') return;
-  if (e.key === 'ArrowUp')    { spinDial(focusDial, -1); e.preventDefault(); }
-  if (e.key === 'ArrowDown')  { spinDial(focusDial,  1); e.preventDefault(); }
-  if (e.key === 'ArrowLeft')  { spinDial(focusDial, -1); e.preventDefault(); }
-  if (e.key === 'ArrowRight') { spinDial(focusDial,  1); e.preventDefault(); }
-  if (e.key === 'Tab')        { focusDial = (focusDial + (e.shiftKey ? -1 : 1) + 3) % 3; e.preventDefault(); }
-  if (e.key === 'Enter' || e.key === ' ') { pullHandle(); e.preventDefault(); }
-  if (e.key === '1') focusDial = 0;
-  if (e.key === '2') focusDial = 1;
-  if (e.key === '3') focusDial = 2;
+
+  // Left/right: switch active dial
+  if (e.key === 'ArrowLeft')  { setFocus(focusDial - 1); e.preventDefault(); return; }
+  if (e.key === 'ArrowRight') { setFocus(focusDial + 1); e.preventDefault(); return; }
+
+  // Up/down: spin active dial
+  if (e.key === 'ArrowUp')   { setFocus(focusDial); spinDial(focusDial, -1); e.preventDefault(); return; }
+  if (e.key === 'ArrowDown') { setFocus(focusDial); spinDial(focusDial, +1); e.preventDefault(); return; }
+
+  if (e.key === 'Tab')   { setFocus(focusDial + (e.shiftKey ? -1 : 1)); e.preventDefault(); return; }
+  if (e.key === 'Enter' || e.key === ' ') { pullHandle(); e.preventDefault(); return; }
+  if (e.key === '1') setFocus(0);
+  if (e.key === '2') setFocus(1);
+  if (e.key === '3') setFocus(2);
 });
 
 // ═══════════════════════════════════════════════════════════════
@@ -791,9 +837,7 @@ loadState();
 buildDrums();
 refreshHandleState();
 
-if (gs.status !== 'playing') {
-  setTimeout(() => showOverlay(gs.status === 'won'), 400);
-}
+if (gs.status !== 'playing') setTimeout(() => showOverlay(gs.status === 'won'), 400);
 </script>
 </body>
 </html>
